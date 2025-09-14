@@ -57,19 +57,20 @@
                     </h2>
                     <form id="add-link-form" class="form">
                         <div class="input-group">
-                            <label for="download-link" class="label">URL de descarga</label>
-                            <input 
-                                type="url" 
+                            <label for="download-link" class="label">URLs de descarga (una por línea o separadas por comas)</label>
+                            <textarea 
                                 id="download-link" 
                                 class="input" 
-                                placeholder="https://ejemplo.com/archivo.zip"
+                                rows="4"
+                                placeholder="https://ejemplo.com/archivo1.zip
+https://ejemplo.com/archivo2.zip"
                                 required
-                            >
-                            <div class="input-actions">
-                                <button type="button" id="paste-btn" class="btn-secondary">
+                            ></textarea>
+                            <div class="input-actions" style="position: absolute; bottom: 8px; right: 8px;">
+                                <button type="button" id="paste-btn" class="btn-secondary" title="Pegar enlaces">
                                     <i class="fas fa-paste"></i>
                                 </button>
-                                <button type="button" id="clear-btn" class="btn-secondary">
+                                <button type="button" id="clear-btn" class="btn-secondary" title="Limpiar">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>

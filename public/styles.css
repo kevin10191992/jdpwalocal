@@ -213,6 +213,60 @@ body {
   gap: 0.25rem;
 }
 
+/* Textarea specific styles */
+textarea.input {
+  min-height: 100px;
+  resize: vertical;
+  padding: 0.75rem 1rem 2.5rem 1rem; /* Extra padding at bottom for buttons */
+  line-height: 1.5;
+  font-family: var(--font-family);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+textarea.input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-light);
+  outline: none;
+}
+
+/* Input actions positioning */
+.input-actions {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+  background: linear-gradient(to right, transparent, var(--surface) 20%);
+  padding-left: 1.5rem;
+  border-radius: 0 0 var(--radius) 0;
+}
+
+/* Button styles */
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+}
+
+.btn-secondary:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+  color: var(--primary-color);
+}
+
+.btn-secondary i {
+  font-size: 1rem;
+}
+
 /* Buttons */
 .btn-primary {
   width: 100%;
@@ -246,28 +300,6 @@ body {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-}
-
-.btn-secondary {
-  background: var(--surface);
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  padding: 0.5rem;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2.5rem;
-  height: 2.5rem;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.btn-secondary:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-hover);
 }
 
 .btn-icon {

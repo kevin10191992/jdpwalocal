@@ -123,26 +123,38 @@ class JDownloaderApp {
         const autostartCheckbox = document.getElementById('autostart');
         const addBtn = document.getElementById('add-btn');
         
-        const link = linkInput.value.trim();
+        const linksText = linkInput.value.trim();
         const autostart = autostartCheckbox.checked;
         
-        if (!link) {
-            this.showToast('Por favor, introduce una URL válida', 'error');
+        if (!linksText) {
+            this.showToast('Por favor, introduce al menos un enlace', 'error');
             return;
         }
         
-        // Validate URL
-        try {
-            new URL(link);
-        } catch {
-            this.showToast('URL no válida', 'error');
+        // Split by new lines or commas and filter out empty strings
+        const links = linksText.split(/[\n,]+/)
+            .map(link => link.trim())
+            .filter(link => link.length > 0);
+        
+        // Validate URLs
+        const invalidLinks = [];
+        for (const link of links) {
+            try {
+                new URL(link);
+            } catch {
+                invalidLinks.push(link);
+            }
+        }
+        
+        if (invalidLinks.length > 0) {
+            this.showToast(`Enlaces no válidos: ${invalidLinks.join(', ')}`, 'error');
             return;
         }
         
         // Disable button and show loading
         addBtn.disabled = true;
         const originalText = addBtn.innerHTML;
-        addBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin\"></i> Añadiendo...';
+        addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Añadiendo...';
         
         try {
             const response = await fetch(`${this.apiBase}/add`, {
@@ -150,13 +162,30 @@ class JDownloaderApp {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ link, autostart })
+                body: JSON.stringify({ links, autostart })
             });
             
             const result = await response.json();
             
             if (response.ok) {
-                this.showToast('Descarga añadida correctamente', 'success');
+                if (result.success) {
+                    this.showToast(
+                        links.length > 1 
+                            ? `${links.length} descargas añadidas correctamente` 
+                            : 'Descarga añadida correctamente',
+                        'success'
+                    );
+                } else {
+                    const failedCount = result.results ? result.results.filter(r => !r.success).length : 0;
+                    if (failedCount > 0) {
+                        this.showToast(
+                            `Error al añadir ${failedCount} de ${links.length} descargas`,
+                            'warning'
+                        );
+                    } else {
+                        this.showToast('Error al añadir las descargas', 'error');
+                    }
+                }
                 linkInput.value = '';
                 await this.loadDownloads();
             } else {

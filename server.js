@@ -36,26 +36,26 @@ async function testConnection() {
     console.log('🔌 Connecting to JDownloader...');
     await jdownloader.connect(JD_EMAIL, JD_PASSWORD);
     console.log('✅ Connected to JDownloader');
-    
+
     // Lista los dispositivos disponibles
     const devices = await jdownloader.listDevices();
     availableDevices = devices;
     console.log('📱 Available devices:', devices.map(d => d.name).join(', '));
-    
+
     if (devices.length === 0) {
       console.warn('⚠️  No devices found in your JDownloader account');
       return false;
     }
-    
+
     // Busca el dispositivo específico o usa el primero disponible
     const targetDevice = devices.find(d => d.name === JD_DEVICE) || devices[0];
     targetDeviceId = targetDevice.id;
     console.log(`🎯 Using device: ${targetDevice.name} (ID: ${targetDeviceId})`);
-    
+
     if (JD_DEVICE && !devices.find(d => d.name === JD_DEVICE)) {
       console.warn(`⚠️  Device "${JD_DEVICE}" not found, using "${targetDevice.name}"`);
     }
-    
+
     isConnected = true;
     return true;
   } catch (error) {
@@ -68,18 +68,29 @@ async function testConnection() {
 // Add download link
 app.post('/add', async (req, res) => {
   try {
-    const { link, autostart = true } = req.body;
-    if (!link) {
-      return res.status(400).json({ error: 'Link is required' });
+    const { links, autostart = true } = req.body;
+    let linkArray = [];
+
+    // Handle both single link and array of links
+    if (Array.isArray(links)) {
+      linkArray = links;
+    } else if (typeof links === 'string') {
+      linkArray = [links];
+    } else {
+      return res.status(400).json({ error: 'Links must be a string or an array of strings' });
+    }
+
+    if (linkArray.length === 0) {
+      return res.status(400).json({ error: 'At least one link is required' });
     }
 
     if (!isConnected || !targetDeviceId) {
       return res.status(503).json({ error: 'Not connected to JDownloader or no device available' });
     }
 
-    console.log(`📥 Adding download: ${link}`);
-    const links = Array.isArray(link) ? link : [link];
-const result = await jdownloader.addLinks(links, targetDeviceId, autostart);
+    console.log(`📥 Adding ${linkArray.length} download(s):`, linkArray);
+    const result = await jdownloader.addLinks(linkArray, targetDeviceId, autostart);
+
     res.json({ success: true, message: 'Download added successfully', result });
   } catch (error) {
     console.error('Error adding download:', error);
@@ -111,7 +122,7 @@ app.get('/devices', async (req, res) => {
     if (!isConnected) {
       return res.status(503).json({ error: 'Not connected to JDownloader' });
     }
-    
+
     res.json({ devices: availableDevices, current: targetDeviceId });
   } catch (error) {
     console.error('Error getting devices:', error);
@@ -130,7 +141,7 @@ app.get('/packages', async (req, res) => {
     const linksResult = await jdownloader.queryLinks(targetDeviceId);
     const links = linksResult.data || linksResult;
     const packageUUIDs = [...new Set(links.map(link => link.packageUUID))].join(',');
-    
+
     if (packageUUIDs) {
       const packagesResult = await jdownloader.queryPackages(targetDeviceId, packageUUIDs);
       const packages = packagesResult.data || packagesResult;
