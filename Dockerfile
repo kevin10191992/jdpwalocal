@@ -7,14 +7,11 @@ WORKDIR /app
 # Install system dependencies
 RUN apk add --no-cache curl
 
-# Install pnpm
-RUN npm install -g pnpm@8.6.0
-
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
+COPY package*.json ./
 
-# Install dependencies with pnpm
-RUN pnpm install --frozen-lockfile --prod
+# Install dependencies with npm
+RUN npm ci --only=production
 
 # Copy the rest of the application
 COPY . .
