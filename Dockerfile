@@ -1,31 +1,20 @@
-# Use the official Node.js LTS image
+# Use the official Node.js 16 image
 FROM node:lts-alpine
 
-# Set working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies
-RUN apk add --no-cache curl
-
-# Copy package files
+# Copy package.json and package-lock.json to the container
 COPY package*.json ./
 
-# Install dependencies with npm
-RUN npm ci --only=production
+# Install the dependencies
+RUN npm install
 
-# Copy the rest of the application
+# Copy the rest of the application code to the container
 COPY . .
 
-# Expose the port the app runs on
+# Expose port 4000 to the host
 EXPOSE 4000
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=4000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:4000/ || exit 1
-
 # Start the application
-CMD ["node", "server.js"]
+CMD [ "npm", "start" ]
