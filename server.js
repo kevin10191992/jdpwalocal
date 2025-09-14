@@ -78,7 +78,8 @@ app.post('/add', async (req, res) => {
     }
 
     console.log(`📥 Adding download: ${link}`);
-    const result = await jdownloader.addLinks(link, targetDeviceId, autostart);
+    const links = Array.isArray(link) ? link : [link];
+const result = await jdownloader.addLinks(links, targetDeviceId, autostart);
     res.json({ success: true, message: 'Download added successfully', result });
   } catch (error) {
     console.error('Error adding download:', error);
@@ -96,6 +97,7 @@ app.get('/downloads', async (req, res) => {
     const result = await jdownloader.queryLinks(targetDeviceId);
     // La API devuelve los datos dentro de result.data
     const downloads = result.data || result;
+    downloads.sort((a, b) => b.addedDate - a.addedDate);
     res.json(downloads);
   } catch (error) {
     console.error('Error getting downloads:', error);
@@ -142,12 +144,40 @@ app.get('/packages', async (req, res) => {
   }
 });
 
-// Start the server
-app.listen(port, async () => {
+// --- arrancar el servidor HTTP primero ---
+app.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
+  iniciarConexion();
+});
+
+// --- conectar a MyJDownloader sin bloquear el main thread ---
+async function iniciarConexion() {
   try {
     await testConnection();
+    console.log('✅ MyJDownloader conectado y servidor HTTP activo');
   } catch (error) {
-    console.error('Failed to initialize JDownloader connection:', error.message);
+    console.error('⚠️ Error conectando a MyJDownloader:', error.message);
+    console.error('⚠️ El servidor HTTP sigue activo, intenta de nuevo más tarde');
   }
+}
+
+// Manejadores para el cierre limpio del servidor
+process.on('SIGINT', () => {
+  console.log('\n🛑 Recibida señal de interrupción. Cerrando el servidor...');
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('\n🛑 Recibida señal de terminación. Cerrando el servidor...');
+  process.exit(0);
+});
+
+// Manejo de errores no capturados
+process.on('uncaughtException', (error) => {
+  console.error('⚠️ Error no capturado:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ Promesa rechazada no manejada:', reason);
 });

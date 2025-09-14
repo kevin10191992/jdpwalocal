@@ -1,0 +1,9 @@
+### Agregar link a JDownloader
+POST http://localhost:4000/add
+Accept: */*
+Content-Type: application/json
+
+{
+  "link": "https://www.mediafire.com/file/f055pq44n9k9fli/",
+  "autostart": true
+}
