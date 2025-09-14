@@ -1,28 +1,28 @@
-# Use the official Node.js 18 Alpine image as base
-FROM node:18-alpine
+# Use the official Node.js LTS image
+FROM node:lts-alpine
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (or pnpm-lock.yaml)
-COPY package*.json ./
-COPY pnpm-lock.yaml* ./
+# Install system dependencies
+RUN apk add --no-cache curl
 
-# Install pnpm and dependencies
-RUN npm install -g pnpm && \
-    pnpm install --frozen-lockfile && \
-    pnpm add -g pm2
+# Install pnpm
+RUN npm install -g pnpm@8.6.0
 
-# Copy the rest of the application code
+# Copy package files
+COPY package.json pnpm-lock.yaml* ./
+
+# Install dependencies with pnpm
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy the rest of the application
 COPY . .
-
-# Build the application (if you have a build step)
-# RUN npm run build
 
 # Expose the port the app runs on
 EXPOSE 4000
 
-# Set environment variables with defaults
+# Set environment variables
 ENV NODE_ENV=production
 ENV PORT=4000
 
@@ -30,8 +30,5 @@ ENV PORT=4000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:4000/ || exit 1
 
-# Start the application using PM2 for production
-CMD ["pm2-runtime", "start", "server.js", "--name", "jdownloader-remote"]
-
-# Alternative: Start directly with Node (without PM2)
-# CMD ["node", "server.js"]
+# Start the application
+CMD ["node", "server.js"]
