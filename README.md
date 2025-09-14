@@ -172,15 +172,6 @@ CMD ["node", "server.js"]
 4. Push: `git push origin feature/nueva-funcionalidad`
 5. Abre un Pull Request
 
-## 📋 Roadmap
-
-- [ ] 🎨 Tema oscuro/claro
-- [ ] 🔕 Notificaciones push
-- [ ] ⏸️ Pausar/reanudar descargas
-- [ ] 📊 Estadísticas de descarga
-- [ ] 🗂️ Gestión de carpetas
-- [ ] 🔐 Autenticación usuario
-
 ## 🐛 Problemas Conocidos
 
 - **Iconos PWA**: Usar iconos PNG para mejor compatibilidad iOS
