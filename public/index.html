@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>JDownloader Remote</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Control remoto para JDownloader - Añade enlaces de descarga desde tu móvil">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="JDownloader Remote">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" href="/icons/icon-180x180.png">
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#4f46e5">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/styles.css">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1 class="header-title">
+                <i class="fas fa-download"></i>
+                JDownloader Remote
+            </h1>
+            <div class="header-status">
+                <span id="connection-status" class="status-badge status-connecting">
+                    <i class="fas fa-circle"></i>
+                    Conectando...
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Add Link Section -->
+            <section class="section">
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-plus-circle"></i>
+                        Añadir Descarga
+                    </h2>
+                    <form id="add-link-form" class="form">
+                        <div class="input-group">
+                            <label for="download-link" class="label">URL de descarga</label>
+                            <input 
+                                type="url" 
+                                id="download-link" 
+                                class="input" 
+                                placeholder="https://ejemplo.com/archivo.zip"
+                                required
+                            >
+                            <div class="input-actions">
+                                <button type="button" id="paste-btn" class="btn-secondary">
+                                    <i class="fas fa-paste"></i>
+                                </button>
+                                <button type="button" id="clear-btn" class="btn-secondary">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="autostart" checked>
+                                <span class="checkmark"></span>
+                                Iniciar descarga automáticamente
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" id="add-btn">
+                            <i class="fas fa-download"></i>
+                            Añadir Descarga
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Downloads Section -->
+            <section class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-list"></i>
+                            Descargas Actuales
+                        </h2>
+                        <button id="refresh-btn" class="btn-icon" title="Actualizar">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="downloads-container" class="downloads-container">
+                        <div class="loading" id="downloads-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Cargando descargas...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Device Info -->
+            <section class="section">
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-desktop"></i>
+                        Dispositivo
+                    </h2>
+                    <div id="device-info" class="device-info">
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Obteniendo información...
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Install Prompt -->
+    <div id="install-prompt" class="install-prompt hidden">
+        <div class="install-content">
+            <div class="install-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="install-text">
+                <h3>Instalar App</h3>
+                <p>Instala JDownloader Remote para acceso rápido desde tu pantalla de inicio</p>
+            </div>
+            <div class="install-actions">
+                <button id="install-btn" class="btn-primary">
+                    <i class="fas fa-download"></i>
+                    Instalar
+                </button>
+                <button id="dismiss-install" class="btn-secondary">
+                    Ahora no
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/app.js"></script>
+</body>
+</html>

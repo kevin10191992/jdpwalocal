@@ -1,0 +1,13 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="#4f46e5"/>
+  
+  <!-- Download Arrow -->
+  <path d="M256 96C269.255 96 280 106.745 280 120V296.686L339.314 237.372C348.562 228.124 363.438 228.124 372.686 237.372C381.934 246.62 381.934 261.496 372.686 270.744L270.744 372.686C261.496 381.934 246.62 381.934 237.372 372.686L135.43 270.744C126.182 261.496 126.182 246.62 135.43 237.372C144.678 228.124 159.554 228.124 168.802 237.372L232 296.686V120C232 106.745 242.745 96 256 96Z" fill="white"/>
+  
+  <!-- Base Line -->
+  <rect x="128" y="392" width="256" height="24" rx="12" fill="white"/>
+  
+  <!-- JD Text -->
+  <text x="256" y="450" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="white">JD</text>
+</svg>
