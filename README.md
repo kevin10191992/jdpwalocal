@@ -196,3 +196,5 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 📞 **¿Problemas?** Abre un [issue](https://github.com/tu-usuario/jdownloader-remote-pwa/issues)
 
 🚀 **¿Ideas?** ¡Las Pull Requests son bienvenidas!
+
+
