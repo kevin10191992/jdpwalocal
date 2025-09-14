@@ -15,12 +15,6 @@ Una **Progressive Web App (PWA)** moderna y responsive para controlar tu JDownlo
 - 🚀 **Rápida** - Service Worker con caché inteligente
 - 🎯 **Simple** - Interfaz limpia y fácil de usar
 
-## 🖼️ Screenshots
-
-| Móvil | Escritorio |
-|-------|------------|
-| ![Mobile](https://via.placeholder.com/300x600/4f46e5/white?text=PWA+Mobile) | ![Desktop](https://via.placeholder.com/600x400/4f46e5/white?text=PWA+Desktop) |
-
 ## 🚀 Instalación Rápida
 
 ### Requisitos
@@ -98,24 +92,6 @@ fetch('/add', {
     autostart: true
   })
 });
-```
-
-## 📁 Estructura del Proyecto
-
-```
-jdownloader-remote-pwa/
-├── 📁 public/              # Frontend PWA
-│   ├── index.html          # Página principal
-│   ├── app.js             # JavaScript principal
-│   ├── styles.css         # Estilos CSS
-│   ├── sw.js              # Service Worker
-│   ├── manifest.json      # Manifiesto PWA
-│   └── 📁 icons/          # Iconos de la app
-├── server.js              # Backend API + servidor estático
-├── package.json           # Dependencias
-├── .env.example           # Ejemplo de configuración
-└── README.md              # Este archivo
-```
 
 ## 🔧 Desarrollo
 
@@ -190,11 +166,3 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 - [Inter Font](https://rsms.me/inter/) - Por la tipografía
 
 ---
-
-⭐ **¿Te gusta el proyecto?** ¡Dale una estrella en GitHub!
-
-📞 **¿Problemas?** Abre un [issue](https://github.com/tu-usuario/jdownloader-remote-pwa/issues)
-
-🚀 **¿Ideas?** ¡Las Pull Requests son bienvenidas!
-
-
