@@ -89,7 +89,7 @@ app.post('/add', async (req, res) => {
     }
 
     console.log(`📥 Adding ${linkArray.length} download(s):`, linkArray);
-    const result = await jdownloader.addLinks(linkArray, targetDeviceId, autostart);
+    const result = await withJD(() => jdownloader.addLinks(linkArray, targetDeviceId, autostart));
 
     res.json({ success: true, message: 'Download added successfully', result });
   } catch (error) {
@@ -178,8 +178,11 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-process.on('SIGTERM', () => {
-  console.log('\n🛑 Recibida señal de terminación. Cerrando el servidor...');
+process.on('SIGINT', async () => {
+  console.log('\n🛑 Cerrando...');
+  try {
+    await jdownloader.disconnect();
+  } catch {}
   process.exit(0);
 });
 
@@ -192,3 +195,25 @@ process.on('uncaughtException', (error) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('⚠️ Promesa rechazada no manejada:', reason);
 });
+
+async function withJD(action) {
+  try {
+    return await action();
+  } catch (error) {
+    if (error.message?.includes('403') || error.message?.includes('401')) {
+      console.warn('⚠️ Sesión expirada. Reintentando conexión...');
+      await testConnection();
+      return await action();
+    }
+    throw error;
+  }
+}
+
+setInterval(async () => {
+  console.log('♻️ Renovando sesión con MyJDownloader...');
+  try {
+    await testConnection();
+  } catch (e) {
+    console.error('❌ Falló renovación:', e.message);
+  }
+}, 30 * 60 * 1000); // cada 30 minutos
