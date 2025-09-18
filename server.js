@@ -70,7 +70,7 @@ app.post('/add', async (req, res) => {
   try {
     const { links, autostart = true } = req.body;
     let linkArray = [];
-
+    await testConnection();
     // Handle both single link and array of links
     if (Array.isArray(links)) {
       linkArray = links;
@@ -89,12 +89,14 @@ app.post('/add', async (req, res) => {
     }
 
     console.log(`📥 Adding ${linkArray.length} download(s):`, linkArray);
-    const result = await withJD(() => jdownloader.addLinks(linkArray, targetDeviceId, autostart));
+    const result = await jdownloader.addLinks(linkArray, targetDeviceId, autostart);
 
     res.json({ success: true, message: 'Download added successfully', result });
   } catch (error) {
     console.error('Error adding download:', error);
     res.status(500).json({ error: error.message });
+  }finally{
+   await jdownloader.disconnect();
   }
 });
 
@@ -110,6 +112,7 @@ app.get('/downloads', async (req, res) => {
     const downloads = result.data || result;
     downloads.sort((a, b) => b.addedDate - a.addedDate);
     res.json(downloads);
+
   } catch (error) {
     console.error('Error getting downloads:', error);
     res.status(500).json({ error: error.message });
@@ -122,7 +125,6 @@ app.get('/devices', async (req, res) => {
     if (!isConnected) {
       return res.status(503).json({ error: 'Not connected to JDownloader' });
     }
-
     res.json({ devices: availableDevices, current: targetDeviceId });
   } catch (error) {
     console.error('Error getting devices:', error);
@@ -195,25 +197,3 @@ process.on('uncaughtException', (error) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('⚠️ Promesa rechazada no manejada:', reason);
 });
-
-async function withJD(action) {
-  try {
-    return await action();
-  } catch (error) {
-    if (error.message?.includes('403') || error.message?.includes('401')) {
-      console.warn('⚠️ Sesión expirada. Reintentando conexión...');
-      await testConnection();
-      return await action();
-    }
-    throw error;
-  }
-}
-
-setInterval(async () => {
-  console.log('♻️ Renovando sesión con MyJDownloader...');
-  try {
-    await testConnection();
-  } catch (e) {
-    console.error('❌ Falló renovación:', e.message);
-  }
-}, 30 * 60 * 1000); // cada 30 minutos

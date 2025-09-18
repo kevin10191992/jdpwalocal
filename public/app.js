@@ -22,8 +22,8 @@ class JDownloaderApp {
         await this.loadDeviceInfo();
         await this.loadDownloads();
         
-        // Auto-refresh downloads every 30 seconds
-        setInterval(() => this.loadDownloads(), 30000);
+        // Auto-refresh downloads every 60 seconds
+        setInterval(() => this.loadDownloads(), 60000);
     }
     
     async registerServiceWorker() {
