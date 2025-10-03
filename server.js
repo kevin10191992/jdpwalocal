@@ -103,10 +103,12 @@ app.post('/add', async (req, res) => {
 // Get list of downloads
 app.get('/downloads', async (req, res) => {
   try {
+    
     if (!isConnected || !targetDeviceId) {
       return res.status(503).json({ error: 'Not connected to JDownloader or no device available' });
     }
 
+    await jdownloader.reconnect();
     const result = await jdownloader.queryLinks(targetDeviceId);
     // La API devuelve los datos dentro de result.data
     const downloads = result.data || result;
