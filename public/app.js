@@ -23,7 +23,7 @@ class JDownloaderApp {
         await this.loadDownloads();
         
         // Auto-refresh downloads every 60 seconds
-        setInterval(() => this.loadDownloads(), 60000);
+        setInterval(() => this.loadDownloads(), 160000);
     }
     
     async registerServiceWorker() {
@@ -332,7 +332,7 @@ class JDownloaderApp {
             return;
         }
         
-        const downloadsHTML = downloads.map(download => {
+        const downloadsHTML = downloads.data.map(download => {
             const progress = download.bytesLoaded && download.bytesTotal 
                 ? Math.round((download.bytesLoaded / download.bytesTotal) * 100)
                 : 0;

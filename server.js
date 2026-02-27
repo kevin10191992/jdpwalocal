@@ -1,3 +1,4 @@
+// server.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -25,35 +26,37 @@ app.use(express.json());
 // Servir archivos estáticos de la PWA
 app.use(express.static('public'));
 
-// Variables globales para almacenar el estado de la conexión
 let isConnected = false;
 let availableDevices = [];
 let targetDeviceId = null;
 
-// Test connection on startup
-async function testConnection() {
+async function connectToJDownloader() {
   try {
     console.log('🔌 Connecting to JDownloader...');
+    // Check if already connected
+    if (isConnected) {
+      console.log('✅ Already connected to JDownloader');
+    return true;
+  }
+
     await jdownloader.connect(JD_EMAIL, JD_PASSWORD);
     console.log('✅ Connected to JDownloader');
 
-    // Lista los dispositivos disponibles
     const devices = await jdownloader.listDevices();
     availableDevices = devices;
     console.log('📱 Available devices:', devices.map(d => d.name).join(', '));
 
     if (devices.length === 0) {
-      console.warn('⚠️  No devices found in your JDownloader account');
+      console.warn('⚠️ No devices found in your JDownloader account');
       return false;
-    }
+}
 
-    // Busca el dispositivo específico o usa el primero disponible
     const targetDevice = devices.find(d => d.name === JD_DEVICE) || devices[0];
     targetDeviceId = targetDevice.id;
     console.log(`🎯 Using device: ${targetDevice.name} (ID: ${targetDeviceId})`);
 
     if (JD_DEVICE && !devices.find(d => d.name === JD_DEVICE)) {
-      console.warn(`⚠️  Device "${JD_DEVICE}" not found, using "${targetDevice.name}"`);
+      console.warn(`⚠️ Device "${JD_DEVICE}" not found, using "${targetDevice.name}"`);
     }
 
     isConnected = true;
@@ -65,63 +68,49 @@ async function testConnection() {
   }
 }
 
-// Add download link
+async function monitorConnection() {
+  try {
+    await connectToJDownloader();
+    setTimeout(monitorConnection, 60000); // Reintentar cada minuto
+  } catch (error) {
+    console.error('❌ Connection lost. Retrying in 1 minute...', error.message);
+    setTimeout(monitorConnection, 60000); // Reintentar cada minuto
+  }
+}
+
 app.post('/add', async (req, res) => {
   try {
     const { links, autostart = true } = req.body;
-    let linkArray = [];
-    await testConnection();
-    // Handle both single link and array of links
-    if (Array.isArray(links)) {
-      linkArray = links;
-    } else if (typeof links === 'string') {
-      linkArray = [links];
-    } else {
+    if (!Array.isArray(links) && typeof links !== 'string') {
       return res.status(400).json({ error: 'Links must be a string or an array of strings' });
     }
 
-    if (linkArray.length === 0) {
+    if (links.length === 0) {
       return res.status(400).json({ error: 'At least one link is required' });
     }
 
-    if (!isConnected || !targetDeviceId) {
-      return res.status(503).json({ error: 'Not connected to JDownloader or no device available' });
-    }
+    await connectToJDownloader();
 
-    console.log(`📥 Adding ${linkArray.length} download(s):`, linkArray);
-    const result = await jdownloader.addLinks(linkArray, targetDeviceId, autostart);
-
+    const result = await jdownloader.addLinks(links, targetDeviceId, autostart);
     res.json({ success: true, message: 'Download added successfully', result });
   } catch (error) {
     console.error('Error adding download:', error);
     res.status(500).json({ error: error.message });
-  }finally{
-   await jdownloader.disconnect();
   }
 });
 
-// Get list of downloads
 app.get('/downloads', async (req, res) => {
   try {
-    
-    if (!isConnected || !targetDeviceId) {
-      return res.status(503).json({ error: 'Not connected to JDownloader or no device available' });
-    }
-
-    await jdownloader.reconnect();
-    const result = await jdownloader.queryLinks(targetDeviceId);
-    // La API devuelve los datos dentro de result.data
-    const downloads = result.data || result;
-    downloads.sort((a, b) => b.addedDate - a.addedDate);
+    await connectToJDownloader();
+    const downloads = await jdownloader.queryLinks(targetDeviceId);
+    downloads.data.sort((a, b) => b.addedDate - a.addedDate);
     res.json(downloads);
-
   } catch (error) {
     console.error('Error getting downloads:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get devices list
 app.get('/devices', async (req, res) => {
   try {
     if (!isConnected) {
@@ -134,22 +123,14 @@ app.get('/devices', async (req, res) => {
   }
 });
 
-// Get packages status
 app.get('/packages', async (req, res) => {
   try {
-    if (!isConnected || !targetDeviceId) {
-      return res.status(503).json({ error: 'Not connected to JDownloader or no device available' });
-    }
-
-    // Primero obtenemos los links para conseguir los UUIDs de paquetes
+    await connectToJDownloader();
     const linksResult = await jdownloader.queryLinks(targetDeviceId);
-    const links = linksResult.data || linksResult;
-    const packageUUIDs = [...new Set(links.map(link => link.packageUUID))].join(',');
-
+    const packageUUIDs = [...new Set(linksResult.data.map(link => link.packageUUID))].join(',');
     if (packageUUIDs) {
       const packagesResult = await jdownloader.queryPackages(targetDeviceId, packageUUIDs);
-      const packages = packagesResult.data || packagesResult;
-      res.json(packages);
+      res.json(packagesResult.data || packagesResult);
     } else {
       res.json([]);
     }
@@ -159,38 +140,20 @@ app.get('/packages', async (req, res) => {
   }
 });
 
-// --- arrancar el servidor HTTP primero ---
 app.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
-  iniciarConexion();
+  connectToJDownloader();
+  monitorConnection(); // Iniciar el monitoreo de la conexión
 });
 
-// --- conectar a MyJDownloader sin bloquear el main thread ---
-async function iniciarConexion() {
-  try {
-    await testConnection();
-    console.log('✅ MyJDownloader conectado y servidor HTTP activo');
-  } catch (error) {
-    console.error('⚠️ Error conectando a MyJDownloader:', error.message);
-    console.error('⚠️ El servidor HTTP sigue activo, intenta de nuevo más tarde');
-  }
-}
-
-// Manejadores para el cierre limpio del servidor
-process.on('SIGINT', () => {
-  console.log('\n🛑 Recibida señal de interrupción. Cerrando el servidor...');
-  process.exit(0);
-});
-
-process.on('SIGINT', async () => {
-  console.log('\n🛑 Cerrando...');
+async function handleShutdown() {
   try {
     await jdownloader.disconnect();
   } catch {}
   process.exit(0);
-});
+}
 
-// Manejo de errores no capturados
+process.on('SIGINT', handleShutdown);
 process.on('uncaughtException', (error) => {
   console.error('⚠️ Error no capturado:', error);
   process.exit(1);
