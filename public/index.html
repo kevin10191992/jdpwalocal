@@ -32,7 +32,7 @@
         <div class="container">
             <h1 class="header-title">
                 <i class="fas fa-download"></i>
-                JDownloader Remote v.1.0.0
+                JDownloader Remote <span id="VersionApp">v.1.0.0</span>
             </h1>
             <div class="header-status">
                 <span id="connection-status" class="status-badge status-connecting">
@@ -155,7 +155,17 @@ https://ejemplo.com/archivo2.zip"
         </div>
     </div>
 
+
+<script src="/app.js?v=1.0.0"></script>
+
     <!-- Scripts -->
-    <script src="/app.js"></script>
+    <script>
+  fetch('/version')
+    .then(res => res.json())
+    .then(data => {
+      const versionElement = document.getElementById('VersionApp');
+      versionElement.textContent = `v${data.version}`;
+    });
+</script>
 </body>
 </html>

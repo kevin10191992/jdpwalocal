@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const jdownloader = require('jdownloader-api');
+const packageJson = require('./package.json');
 
 dotenv.config();
 
@@ -140,8 +141,16 @@ app.get('/packages', async (req, res) => {
   }
 });
 
+
+app.get('/version', (req, res) => {
+  res.json({
+    name: packageJson.name,
+    version: packageJson.version
+  });
+});
+
 app.listen(port, () => {
-  console.log(`🚀 Server running at http://localhost:${port}`);
+  console.log(`🚀 Server running - v${packageJson.version} at http://localhost:${port}`);
   connectToJDownloader();
   monitorConnection(); // Iniciar el monitoreo de la conexión
 });
